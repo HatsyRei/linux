@@ -14,14 +14,14 @@
 		/* LED_STATUSy on GPIO46 */
 		status {
 			label = "nilrt:status:yellow";
-			gpios = <&gpio 46 0>;
+			gpios = <&gpio0 46 0>;
 			default-state = "on";
 		};
 
 		/* LED_ACTIVEg on GPIO47 */
 		active {
 			label = "nilrt:active:green";
-			gpios = <&gpio 47 0>;
+			gpios = <&gpio0 47 0>;
 			default-state = "off";
 		};
 	};
@@ -34,7 +34,7 @@
 		/* Reset switch is on GPIO48 */
 		reset_sw@0 {
 			label = "reset_sw";
-			gpios = <&gpio 48 1 /* GPIO_ACTIVE_LOW */>;
+			gpios = <&gpio0 48 1 /* GPIO_ACTIVE_LOW */>;
 			linux,code = <408>; /* KEY_RESTART */
 			gpio-key,wakeup;
 		};
@@ -44,7 +44,7 @@
 		compatible = "gpio-restart";
 
 		/* ~PS_FORCE_RESET is on GPIO44 */
-		gpios = <&gpio 44 1 /* GPIO_ACTIVE_LOW */>;
+		gpios = <&gpio0 44 1 /* GPIO_ACTIVE_LOW */>;
 		priority = <200>;
 	};
 
@@ -107,7 +107,7 @@
 &gem0 {
 	status = "okay";
 	emio-speed-gpios = <0>,
-			   <&gpio 54 0>;
+			   <&gpio0 54 0>;
 
 	#address-cells = <0x1>;
 	#size-cells = <0x0>;
