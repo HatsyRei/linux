@@ -8,21 +8,6 @@
 	model = "NI Bluefin";
 	compatible = "ni,zynq", "xlnx,zynq-7000";
 
-	axi {
-		i2c0: i2c@e0004000 {
-			/* Override ni-zynq.dtsi; we do not have a CPLD at 0x40. */
-			nicpld@40 {
-				status = "disabled";
-			};
-
-			tmp451@4c {
-				compatible = "ti,tmp451";
-				reg = <0x4c>;
-				vcc-supply = <&regulator_vccpint>;
-			};
-		};
-	};
-
 	leds {
 		compatible = "gpio-leds";
 
@@ -94,6 +79,28 @@
 				/* phy-handle = <&swport2>; */
 			};
 		};
+	};
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <400000>;
+
+	ds3231_rtc@68 {
+		compatible = "ds3232";
+		status = "disabled";
+		reg = <0x68>;
+	};
+
+	tmp451@4c {
+		compatible = "ti,tmp451";
+		reg = <0x4c>;
+		vcc-supply = <&regulator_vccpint>;
+	};
+
+	eeprom: eeprom@52 {
+		compatible = "atmel,24c02";
+		reg = <0x52>;
 	};
 };
 
