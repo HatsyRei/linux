@@ -70,6 +70,8 @@ static const struct of_device_id pl353_smc_supported_children[] = {
 
 static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 {
+	dev_warn(&adev->dev, "LOADING SMC PROBE\n");
+	
 	struct device_node *of_node = adev->dev.of_node;
 	const struct of_device_id *match = NULL;
 	struct pl353_smc_data *pl353_smc;
@@ -123,6 +125,8 @@ static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 
 	of_platform_device_create(child, NULL, &adev->dev);
 	of_node_put(child);
+
+	dev_warn(&adev->dev, "EXIT SMC PROBE\n");
 
 	return 0;
 
