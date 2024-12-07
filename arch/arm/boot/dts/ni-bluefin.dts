@@ -15,9 +15,9 @@
 				status = "disabled";
 			};
 
-			tmp451@4C {
+			tmp451@4c {
 				compatible = "ti,tmp451";
-				reg = <0x4C>;
+				reg = <0x4c>;
 				vcc-supply = <&regulator_vccpint>;
 			};
 		};
