@@ -8,7 +8,7 @@
 	model = "NI Bluefin";
 	compatible = "ni,zynq", "xlnx,zynq-7000";
 
-	amba@0 {
+	axi {
 		i2c0: i2c@e0004000 {
 			/* Override ni-zynq.dtsi; we do not have a CPLD at 0x40. */
 			nicpld@40 {
