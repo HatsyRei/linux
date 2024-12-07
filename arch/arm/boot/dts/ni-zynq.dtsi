@@ -187,7 +187,7 @@
 			clock-frequency = <400000>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-		} ;
+		};
 
 		i2c2: i2c@81000000 {
 			compatible = "xlnx,xps-iic-2.00.a";
@@ -241,8 +241,8 @@
 
 &nfc0 {
 	status = "okay";
-}
+};
 
 &smcc {
 	status = "okay";
-}
+};
