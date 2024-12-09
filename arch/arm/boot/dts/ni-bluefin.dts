@@ -47,60 +47,29 @@
 		gpios = <&gpio0 44 1 /* GPIO_ACTIVE_LOW */>;
 		priority = <200>;
 	};
-
-	dsa@0 {
-		compatible = "marvell,dsa";
-		#address-cells = <2>;
-		#size-cells = <0>;
-
-		dsa,ethernet = <&gem0>;
-		dsa,mii-bus = <&gem0>;
-
-		switch@0 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			/* MDIO addr 0x0 (single-chip addressing), switch 0 */
-			reg = <0 0>;
-
-			port@0 {
-				reg = <0x0>;
-				label = "cpu";
-			};
-
-			port@1 {
-				reg = <0x1>;
-				label = "sw0";
-				/* phy-handle = <&swport1>; */
-			};
-
-			port@2 {
-				reg = <0x2>;
-				label = "sw1";
-				/* phy-handle = <&swport2>; */
-			};
-		};
-	};
 };
 
 &i2c0 {
 	status = "okay";
 	clock-frequency = <400000>;
 
+	eeprom: eeprom@52 {
+		compatible = "atmel,24c02";
+		status = "okay";
+		reg = <0x52>;
+	};
+
 	ds3231_rtc@68 {
 		compatible = "ds3232";
-		status = "disabled";
+		status = "okay";
 		reg = <0x68>;
 	};
 
 	tmp451@4c {
 		compatible = "ti,tmp451";
+		status = "okay";
 		reg = <0x4c>;
 		vcc-supply = <&regulator_vccpint>;
-	};
-
-	eeprom: eeprom@52 {
-		compatible = "atmel,24c02";
-		reg = <0x52>;
 	};
 };
 
@@ -109,13 +78,47 @@
 	emio-speed-gpios = <0>,
 			   <&gpio0 54 0>;
 
-	#address-cells = <0x1>;
-	#size-cells = <0x0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	mdio0: mdio {
+		status = "okay";
+	};
 
 	fixed-link {
 		speed = <1000>;
 		full-duplex;
 		reg = <0>;
+	};
+};
+
+&mdio0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	switch0: switch@0 {
+		compatible = "marvell,mv88e6085";
+		reg = <0>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+ 
+			port@0 {
+				reg = <0>;
+				label = "cpu";
+			};
+ 
+			port@1 {
+				reg = <1>;
+				label = "sw0";
+			};
+ 
+			port@2 {
+				reg = <2>;
+				label = "sw1";
+			};
+		};
 	};
 };
 
@@ -131,4 +134,16 @@
 &watchdog0 {
 	status = "okay";
 	reset-on-timeout;
+};
+
+&nfc0 {
+	status = "okay";
+
+	nand@0 {
+		reg = <0>;
+	};
+};
+
+&smcc {
+	status = "okay";
 };
