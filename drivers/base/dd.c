@@ -1154,7 +1154,9 @@ static int __driver_attach(struct device *dev, void *data)
 	 * is an error.
 	 */
 
+	printk("Matching %s against %s\n", drv->name, dev_name(dev));
 	ret = driver_match_device(drv, dev);
+
 	if (ret == 0) {
 		/* no match */
 		return 0;
@@ -1175,6 +1177,8 @@ static int __driver_attach(struct device *dev, void *data)
 		 */
 		return 0;
 	} /* ret > 0 means positive match */
+
+	printk("Matching %s against %s, MATCHED\n", drv->name, dev_name(dev));
 
 	if (driver_allows_async_probing(drv)) {
 		/*

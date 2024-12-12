@@ -47,8 +47,13 @@ amba_cs_uci_id_match(const struct amba_id *table, struct amba_device *dev)
 }
 
 static const struct amba_id *
-amba_lookup(const struct amba_id *table, struct amba_device *dev)
+amba_lookup(const struct amba_id *table, struct amba_device *dev, const char *driver_name)
 {
+	printk("amba_id     table->mask:                 %x\n", table->mask);
+	printk("amba_id     table->id:                   %x\n", table->id);
+	printk("amba_device dev->periphid:               %x\n", dev->periphid);
+	printk("amba_device dev->periphid & table->mask: %x\n", dev->periphid & table->mask);
+
 	while (table->mask) {
 		if (((dev->periphid & table->mask) == table->id) &&
 			((dev->cid != CORESIGHT_CID) ||
@@ -139,12 +144,14 @@ static int amba_read_periphid(struct amba_device *dev)
 
 	ret = dev_pm_domain_attach(&dev->dev, true);
 	if (ret) {
+		printk("amba_read_periphid can't get PM domain: %d\n", ret);
 		dev_dbg(&dev->dev, "can't get PM domain: %d\n", ret);
 		goto err_out;
 	}
 
 	ret = amba_get_enable_pclk(dev);
 	if (ret) {
+		printk("amba_read_periphid can't get pclk: %d\n", ret);
 		dev_dbg(&dev->dev, "can't get pclk: %d\n", ret);
 		goto err_pm;
 	}
@@ -206,12 +213,16 @@ err_out:
 
 static int amba_match(struct device *dev, struct device_driver *drv)
 {
+	printk("%s: ENTERING amba_match against %s\n", drv->name, dev_name(dev));
+
 	struct amba_device *pcdev = to_amba_device(dev);
 	struct amba_driver *pcdrv = to_amba_driver(drv);
 
 	mutex_lock(&pcdev->periphid_lock);
 	if (!pcdev->periphid) {
+		printk("%s: ENTERING amba_match -> amba_read_periphid against %s\n", drv->name, dev_name(dev));
 		int ret = amba_read_periphid(pcdev);
+		printk("%s: ENTERING amba_match -> amba_read_periphid against %s, returns %d\n", drv->name, dev_name(dev), ret);
 
 		/*
 		 * Returning any error other than -EPROBE_DEFER from bus match
@@ -232,7 +243,9 @@ static int amba_match(struct device *dev, struct device_driver *drv)
 	if (pcdev->driver_override)
 		return !strcmp(pcdev->driver_override, drv->name);
 
-	return amba_lookup(pcdrv->id_table, pcdev) != NULL;
+	printk("%s: ENTERING amba_match -> amba_lookup against %s\n", drv->name, dev_name(dev));
+
+	return amba_lookup(pcdrv->id_table, pcdev, drv->name) != NULL;
 }
 
 static int amba_uevent(struct device *dev, struct kobj_uevent_env *env)
@@ -276,24 +289,32 @@ static int of_amba_device_decode_irq(struct amba_device *dev)
  */
 static int amba_probe(struct device *dev)
 {
+	printk("%s: ENTERING amba_probe\n", dev->driver->name);
+
 	struct amba_device *pcdev = to_amba_device(dev);
 	struct amba_driver *pcdrv = to_amba_driver(dev->driver);
-	const struct amba_id *id = amba_lookup(pcdrv->id_table, pcdev);
+	const struct amba_id *id = amba_lookup(pcdrv->id_table, pcdev, dev->driver->name);
 	int ret;
 
+	printk("amba_probe: %s\n", dev->driver->name);
+
 	do {
+		printk("amba_probe: %s: of_amba_device_decode_irq\n", dev->driver->name);
 		ret = of_amba_device_decode_irq(pcdev);
 		if (ret)
 			break;
 
+		printk("amba_probe: %s: of_clk_set_defaults\n", dev->driver->name);
 		ret = of_clk_set_defaults(dev->of_node, false);
 		if (ret < 0)
 			break;
 
+		printk("amba_probe: %s: dev_pm_domain_attach\n", dev->driver->name);
 		ret = dev_pm_domain_attach(dev, true);
 		if (ret)
 			break;
 
+		printk("amba_probe: %s: amba_get_enable_pclk\n", dev->driver->name);
 		ret = amba_get_enable_pclk(pcdev);
 		if (ret) {
 			dev_pm_domain_detach(dev, true);
@@ -304,6 +325,7 @@ static int amba_probe(struct device *dev)
 		pm_runtime_set_active(dev);
 		pm_runtime_enable(dev);
 
+		printk("amba_probe: %s: pcdrv->probe\n", dev->driver->name);
 		ret = pcdrv->probe(pcdev, id);
 		if (ret == 0)
 			break;
@@ -315,6 +337,8 @@ static int amba_probe(struct device *dev)
 		amba_put_disable_pclk(pcdev);
 		dev_pm_domain_detach(dev, true);
 	} while (0);
+
+	printk("amba_probe: %s: BREAK\n", dev->driver->name);
 
 	return ret;
 }
@@ -505,10 +529,15 @@ late_initcall_sync(amba_stub_drv_init);
  *	core.  If devices pre-exist, the drivers probe function will
  *	be called.
  */
+
 int amba_driver_register(struct amba_driver *drv)
 {
+	printk("%s: ENTERING amba_driver_register\n", drv->drv.name);
+
 	if (!drv->probe)
 		return -EINVAL;
+
+	printk("%s: PASSED drv->probe\n", drv->drv.name);
 
 	drv->drv.bus = &amba_bustype;
 
@@ -608,6 +637,7 @@ struct amba_device *amba_device_alloc(const char *name, resource_size_t base,
 	struct amba_device *dev;
 
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
+
 	if (dev) {
 		amba_device_initialize(dev, name);
 		dev->res.start = base;

@@ -70,7 +70,7 @@ static const struct of_device_id pl353_smc_supported_children[] = {
 
 static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 {
-	dev_warn(&adev->dev, "LOADING SMC PROBE\n");
+	printk("pl353_smc_probe: LOADING SMC PROBE\n");
 	
 	struct device_node *of_node = adev->dev.of_node;
 	const struct of_device_id *match = NULL;
@@ -82,11 +82,15 @@ static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 	if (!pl353_smc)
 		return -ENOMEM;
 
+	printk("pl353_smc_probe: PASSED devm_kzalloc\n");
+
 	pl353_smc->aclk = devm_clk_get(&adev->dev, "apb_pclk");
 	if (IS_ERR(pl353_smc->aclk)) {
 		dev_err(&adev->dev, "aclk clock not found.\n");
 		return PTR_ERR(pl353_smc->aclk);
 	}
+
+	printk("pl353_smc_probe: PASSED apb_pclk\n");
 
 	pl353_smc->memclk = devm_clk_get(&adev->dev, "memclk");
 	if (IS_ERR(pl353_smc->memclk)) {
@@ -94,17 +98,23 @@ static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 		return PTR_ERR(pl353_smc->memclk);
 	}
 
+	printk("pl353_smc_probe: PASSED memclk\n");
+
 	err = clk_prepare_enable(pl353_smc->aclk);
 	if (err) {
 		dev_err(&adev->dev, "Unable to enable AXI clock.\n");
 		return err;
 	}
 
+	printk("pl353_smc_probe: PASSED aclk\n");
+
 	err = clk_prepare_enable(pl353_smc->memclk);
 	if (err) {
 		dev_err(&adev->dev, "Unable to enable memory clock.\n");
 		goto disable_axi_clk;
 	}
+
+	printk("pl353_smc_probe: PASSED pl353_smc->memclk\n");
 
 	amba_set_drvdata(adev, pl353_smc);
 
@@ -123,10 +133,13 @@ static int pl353_smc_probe(struct amba_device *adev, const struct amba_id *id)
 		goto disable_mem_clk;
 	}
 
+	printk("pl353_smc_probe: PASSED or_each_available_child_of_node\n");
+
 	of_platform_device_create(child, NULL, &adev->dev);
 	of_node_put(child);
 
-	dev_warn(&adev->dev, "EXIT SMC PROBE\n");
+	printk("pl353_smc_probe: EXIT\n");
+
 
 	return 0;
 
