@@ -243,7 +243,7 @@ static int m25p_probe(struct spi_device *spi)
 	};
 	char *flash_name;
 	int ret;
-
+	pr_info("kkang: m25p_probe: begin.\n");
 	data = dev_get_platdata(&spi->dev);
 
 	flash = devm_kzalloc(&spi->dev, sizeof(*flash), GFP_KERNEL);
@@ -262,6 +262,7 @@ static int m25p_probe(struct spi_device *spi)
 	spi_nor_set_flash_node(nor, spi->dev.of_node);
 	nor->priv = flash;
 
+	pr_info("kkang: m25p_probe: calling func spi_set_drvdata.\n");
 	spi_set_drvdata(spi, flash);
 	flash->spi = spi;
 
@@ -294,6 +295,7 @@ static int m25p_probe(struct spi_device *spi)
 	else
 		flash_name = spi->modalias;
 
+	pr_info("kkang: m25p_probe: calling func spi_nor_scan.\n");
 	ret = spi_nor_scan(nor, flash_name, &hwcaps);
 	if (ret)
 		return ret;

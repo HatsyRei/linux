@@ -104,7 +104,7 @@ static int read_sr(struct spi_nor *nor)
 {
 	int ret;
 	u8 val;
-
+	pr_info("kkang: read_sr: begin\n");
 	ret = nor->read_reg(nor, SPINOR_OP_RDSR, &val, 1);
 	if (ret < 0) {
 		pr_err("error %d reading SR\n", (int) ret);
@@ -124,6 +124,7 @@ static int read_fsr(struct spi_nor *nor)
 	int ret;
 	u8 val;
 
+	pr_info("kkang: read_fsr: begin\n");
 	ret = nor->read_reg(nor, SPINOR_OP_RDFSR, &val, 1);
 	if (ret < 0) {
 		pr_err("error %d reading FSR\n", ret);
@@ -1194,6 +1195,8 @@ static const struct flash_info *spi_nor_read_id(struct spi_nor *nor)
 	u8			id[SPI_NOR_MAX_ID_LEN];
 	const struct flash_info	*info;
 
+	pr_info("kkang: spi_nor_read_id: begin\n");
+
 	tmp = nor->read_reg(nor, SPINOR_OP_RDID, id, SPI_NOR_MAX_ID_LEN);
 	if (tmp < 0) {
 		dev_dbg(nor->dev, "error %d reading JEDEC ID\n", tmp);
@@ -1644,6 +1647,7 @@ static int sr2_bit7_quad_enable(struct spi_nor *nor)
 
 static int spi_nor_check(struct spi_nor *nor)
 {
+	pr_info("kkang: spi_nor_check: begin\n");
 	if (!nor->dev || !nor->read || !nor->write ||
 		!nor->read_reg || !nor->write_reg) {
 		pr_err("spi-nor: please fill all the necessary fields!\n");
@@ -2657,6 +2661,8 @@ int spi_nor_scan(struct spi_nor *nor, const char *name,
 	struct device_node *np = spi_nor_get_flash_node(nor);
 	int ret;
 	int i;
+	
+	pr_info("kkang: spi_nor_scan: begin\n");
 
 	ret = spi_nor_check(nor);
 	if (ret)
